@@ -1,0 +1,41 @@
+version: "3.3"
+
+networks:
+  hfish:
+    ipam:
+      config:
+        - subnet: 192.168.99.0/24
+
+services:
+  web:
+    image: loca1h0st/hfish-server:2.6.1
+    build: .
+    container_name: HFish
+    restart: always
+    tty: true
+    depends_on:
+      - db
+    networks:
+      - hfish
+    ports:
+      - "4433:4433"
+      - "4444:4444"
+  db:
+    image: mysql:5.7.34
+    restart: always
+    container_name: HFish_DB
+    environment:
+      - MYSQL_ROOT_PASSWORD=HFish_123456
+      - TZ=Asia/Shanghai
+    networks:
+      hfish:
+        ipv4_address: 192.168.99.100
+    volumes:
+      - ./data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    command:
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+      --explicit_defaults_for_timestamp=true
+      --lower_case_table_names=1
+      --default-time-zone=+08:00
